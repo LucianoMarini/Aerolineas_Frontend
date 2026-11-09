@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { listarVuelos, topAerolineasRiesgo } from '../api/vuelos.js'
 import Disclaimer from '../components/Disclaimer.jsx'
@@ -20,36 +20,40 @@ export default function Inicio() {
   const [errorVuelos, setErrorVuelos] = useState(null)
   const [seleccionado, setSeleccionado] = useState(null)
 
-  const cargar = useCallback(async () => {
+  const cargarTop = useCallback(async () => {
     setCargandoTop(true)
-    setCargandoVuelos(true)
     setErrorTop(null)
-    setErrorVuelos(null)
-
-    const [resultadoTop, resultadoVuelos] = await Promise.allSettled([
-      topAerolineasRiesgo(),
-      listarVuelos({ limit: 10 }),
-    ])
-
-    if (resultadoTop.status === 'fulfilled') {
-      setTop(resultadoTop.value)
-    } else {
-      setErrorTop(resultadoTop.reason)
+    try {
+      setTop(await topAerolineasRiesgo())
+    } catch (error) {
+      setErrorTop(error)
+    } finally {
+      setCargandoTop(false)
     }
-    setCargandoTop(false)
-
-    if (resultadoVuelos.status === 'fulfilled') {
-      setVuelos(resultadoVuelos.value.results || [])
-      setDisclaimer(resultadoVuelos.value.disclaimer || '')
-    } else {
-      setErrorVuelos(resultadoVuelos.reason)
-    }
-    setCargandoVuelos(false)
   }, [])
 
+  const cargarVuelos = useCallback(async () => {
+    setCargandoVuelos(true)
+    setErrorVuelos(null)
+    try {
+      const data = await listarVuelos({ limit: 10 })
+      setVuelos(data.results || [])
+      setDisclaimer(data.disclaimer || '')
+    } catch (error) {
+      setErrorVuelos(error)
+    } finally {
+      setCargandoVuelos(false)
+    }
+  }, [])
+
+  const yaCargado = useRef(false)
+
   useEffect(() => {
-    cargar()
-  }, [cargar])
+    if (yaCargado.current) return
+    yaCargado.current = true
+    cargarTop()
+    cargarVuelos()
+  }, [cargarTop, cargarVuelos])
 
   return (
     <div className="pagina">
@@ -113,7 +117,7 @@ export default function Inicio() {
             <Spinner texto="Cargando ranking de riesgo..." />
           </div>
         ) : errorTop ? (
-          <MensajeError error={errorTop} onReintentar={cargar} />
+          <MensajeError error={errorTop} onReintentar={cargarTop} />
         ) : top.length === 0 ? (
           <EstadoVacio
             titulo="Todavía no hay historial de aerolíneas"
@@ -176,7 +180,7 @@ export default function Inicio() {
             <Spinner texto="Cargando vuelos de hoy..." />
           </div>
         ) : errorVuelos ? (
-          <MensajeError error={errorVuelos} onReintentar={cargar} />
+          <MensajeError error={errorVuelos} onReintentar={cargarVuelos} />
         ) : vuelos.length === 0 ? (
           <EstadoVacio
             titulo="No hay vuelos cargados para hoy"

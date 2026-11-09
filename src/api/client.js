@@ -2,6 +2,7 @@ import { apiUrl } from './config.js'
 
 const ACCESS_KEY = 'vuelos_eze_access'
 const REFRESH_KEY = 'vuelos_eze_refresh'
+const TIEMPO_MAX_MS = 30000
 
 const MENSAJES_POR_ESTADO = {
   400: 'Los datos enviados no son válidos.',
@@ -145,20 +146,43 @@ export async function apiFetch(path, options = {}) {
     }
     if (token) cabeceras.Authorization = `Bearer ${token}`
 
+    const controlador = new AbortController()
+    let demoroDemasiado = false
+    const temporizador = setTimeout(() => {
+      demoroDemasiado = true
+      controlador.abort()
+    }, TIEMPO_MAX_MS)
+
+    const abortarExterno = () => controlador.abort()
+    if (signal) {
+      if (signal.aborted) controlador.abort()
+      else signal.addEventListener('abort', abortarExterno)
+    }
+
     try {
       return await fetch(apiUrl(path), {
         method,
         headers: cabeceras,
         body: cuerpo,
-        signal,
+        signal: controlador.signal,
       })
     } catch (error) {
+      if (demoroDemasiado) {
+        throw new ApiError(
+          'El servidor tardó demasiado en responder. Probá de nuevo en unos instantes.',
+          0,
+          null,
+        )
+      }
       if (error.name === 'AbortError') throw error
       throw new ApiError(
         'No pudimos conectarnos con el servidor. Revisá tu conexión o que el backend esté corriendo.',
         0,
         null,
       )
+    } finally {
+      clearTimeout(temporizador)
+      if (signal) signal.removeEventListener('abort', abortarExterno)
     }
   }
 
