@@ -3,6 +3,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -12,6 +13,7 @@ import { obtenerDashboard } from '../api/dashboard.js'
 import EstadoVacio from '../components/EstadoVacio.jsx'
 import MensajeError from '../components/MensajeError.jsx'
 import Spinner from '../components/Spinner.jsx'
+import StatCard from '../components/StatCard.jsx'
 import { formatearMes, formatearPorcentaje } from '../utils/formato.js'
 
 const ORDEN_DIAS = [2, 3, 4, 5, 6, 7, 1]
@@ -19,16 +21,6 @@ const ORDEN_DIAS = [2, 3, 4, 5, 6, 7, 1]
 function ordenarDias(items) {
   const porDia = new Map((items || []).map((item) => [item.dia, item]))
   return ORDEN_DIAS.map((dia) => porDia.get(dia)).filter(Boolean)
-}
-
-function StatCard({ etiqueta, valor, nota, destacado = false }) {
-  return (
-    <article className={`stat-card ${destacado ? 'stat-card--destacado' : ''}`}>
-      <span className="stat-card__etiqueta">{etiqueta}</span>
-      <span className="stat-card__valor">{valor}</span>
-      {nota ? <span className="stat-card__nota">{nota}</span> : null}
-    </article>
-  )
 }
 
 const ESTILO_TOOLTIP = {
@@ -95,6 +87,7 @@ export default function Dashboard() {
   const cancelacionesDia = ordenarDias(datos?.cancelaciones_por_dia_semana)
   const demoras = (datos?.demora_promedio_por_aerolinea || []).slice(0, 8)
   const topImpuntuales = datos?.top_aerolineas_impuntuales_mes || []
+  const topTresImpuntuales = topImpuntuales.slice(0, 3)
 
   return (
     <div className="pagina">
@@ -249,37 +242,89 @@ export default function Dashboard() {
             mensaje="Este mes todavía no tiene vuelos cancelados ni retrasados para rankear aerolíneas."
           />
         ) : (
-          <div className="tabla-wrap">
-            <table className="tabla">
-              <caption className="solo-lectores">
-                Aerolíneas más impuntuales del mes
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Aerolínea</th>
-                  <th scope="col">Nombre</th>
-                  <th scope="col">Vuelos</th>
-                  <th scope="col">Cancelados</th>
-                  <th scope="col">Retrasados</th>
-                  <th scope="col">Impuntuales</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topImpuntuales.map((aerolinea) => (
-                  <tr key={aerolinea.aerolinea}>
-                    <td className="tabla__principal">{aerolinea.aerolinea}</td>
-                    <td>{aerolinea.nombre}</td>
-                    <td>{aerolinea.total}</td>
-                    <td>{aerolinea.cancelados}</td>
-                    <td>{aerolinea.retrasados}</td>
-                    <td>
-                      <strong>{aerolinea.impuntuales}</strong>
-                    </td>
+          <>
+            <div className="grafico-card">
+              <div className="grafico-card__encabezado">
+                <h3 className="grafico-card__titulo">
+                  Top 3: cancelados y retrasados por aerolínea
+                </h3>
+                <p className="grafico-card__bajada">
+                  Las tres aerolíneas con más vuelos cancelados y retrasados del
+                  mes.
+                </p>
+              </div>
+              <div className="grafico-card__cuerpo">
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart
+                    data={topTresImpuntuales}
+                    margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e7ecf4" vertical={false} />
+                    <XAxis
+                      dataKey="aerolinea"
+                      tick={{ fontSize: 12, fill: '#62708a' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: 12, fill: '#62708a' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip contentStyle={ESTILO_TOOLTIP} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Bar
+                      dataKey="cancelados"
+                      name="Cancelados"
+                      fill="#b3261e"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={54}
+                    />
+                    <Bar
+                      dataKey="retrasados"
+                      name="Retrasados"
+                      fill="#9a6200"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={54}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="tabla-wrap">
+              <table className="tabla">
+                <caption className="solo-lectores">
+                  Aerolíneas más impuntuales del mes
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Aerolínea</th>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Vuelos</th>
+                    <th scope="col">Cancelados</th>
+                    <th scope="col">Retrasados</th>
+                    <th scope="col">Impuntuales</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {topImpuntuales.map((aerolinea) => (
+                    <tr key={aerolinea.aerolinea}>
+                      <td className="tabla__principal">{aerolinea.aerolinea}</td>
+                      <td>{aerolinea.nombre}</td>
+                      <td>{aerolinea.total}</td>
+                      <td>{aerolinea.cancelados}</td>
+                      <td>{aerolinea.retrasados}</td>
+                      <td>
+                        <strong>{aerolinea.impuntuales}</strong>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </div>

@@ -1880,6 +1880,137 @@ textarea:focus-visible,
   overflow-y: auto;
 }
 
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-1);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-tab {
+  padding: 10px 18px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+  background: transparent;
+  color: var(--color-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.admin-tab:hover {
+  color: var(--color-text);
+  background: var(--color-surface-alt);
+}
+
+.admin-tab:focus-visible {
+  outline: 3px solid rgba(29, 91, 184, 0.28);
+  outline-offset: 2px;
+}
+
+.admin-tab--activo {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.admin-card {
+  padding: var(--espacio-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.admin-card__titulo {
+  font-size: 1rem;
+}
+
+.admin-card__bajada {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.admin-card__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.admin-card__fila > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-card__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+.admin-detalles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  margin: 0;
+}
+
+.admin-detalles div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  border-bottom: 1px dashed var(--color-border);
+  padding-bottom: var(--espacio-2);
+}
+
+.admin-detalles div:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.admin-detalles dt {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.admin-detalles dd {
+  margin: 0;
+  text-align: right;
+}
+
+.admin-acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.admin-accion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  padding: var(--espacio-3) 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.admin-accion:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.admin-accion p {
+  margin: 4px 0 0;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
 @media (max-width: 600px) {
   .ruta-resumen {
     flex-direction: column;

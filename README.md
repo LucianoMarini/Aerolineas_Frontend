@@ -59,7 +59,8 @@ opcional: sin él, se usa el proxy.
 
 - **Público**: inicio, listado de vuelos, búsqueda de vuelo, login y registro.
 - **Pasajero** (usuario registrado): dashboard, comparación de rutas y alertas.
-- **Administrador**: además, panel de estado de recolección y recolección manual.
+- **Administrador**: además, panel de administración: estado de recolección,
+  acciones de mantenimiento y gestión de usuarios.
 
 Para crear un administrador se usa el comando del backend:
 
